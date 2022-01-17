@@ -111,8 +111,8 @@ router.post('/useredit/:id', upload.fields([]), async (req, res, next) => {
 router.post('/register', async (req, res, next) => {
   //Parámetros necesarios para crear al nuevo usuario
   const { usuario_nombre, usuario_apellidos, password, correo, url } = req.body
-
   //Si el password es nulo la data es inválida
+  console.log(req.body)
   if (!password) {
     //Respuesta a la peticionreturn 
     return res.status(400).json({
@@ -151,6 +151,7 @@ router.post('/register', async (req, res, next) => {
     //Respuesta a la peticion
     res.status(201).json(usuario[0])
   } catch (e) {
+    console.log(e)
     //Se maneja los errores en caso de haberlo
     //Respuesta a la peticion
     next(e)

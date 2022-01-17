@@ -13,6 +13,7 @@ var generator = new CodeGenerator()
 //Declaramos el patron
 var pattern = '***#**##'
 //Este patron se usara para crear el codigo
+const cursosMock = require('../mocks/cursosMock')
 
 //Declaramos la ruta
 router.get('/cursos/:iduser', async (req, res, next) => {
@@ -42,7 +43,13 @@ router.get('/courses/:id', async (req, res, next) => {
 
   // Obtenemos el id del usuario de los parametros de la ruta de la peticion
   const { id } = req.params
-
+  if (process.env.NODE_ENV === 'test') {
+    var curso = cursosMock.filter(curso => curso.curso_id === id)
+    res.status(200).json({
+      data: curso
+    })
+  }
+  else {
     // Aqui va el query para obtener un curso especifico por su id
     const course = await pool.query('SELECT * FROM cursos WHERE curso_id = ?', [id])
     // Aqui va el query para obtener un alumno especifico por su id
@@ -52,8 +59,9 @@ router.get('/courses/:id', async (req, res, next) => {
       data: course[0],
       alumnos: Object.values(alumnos[0])[0]
     })
-    //Manejo de errror
-    //EMpezamos con el catch
+  }
+  //Manejo de errror
+  //EMpezamos con el catch
 
 })
 //Declaramos la ruta
@@ -63,6 +71,7 @@ router.post('/courses', async (req, res, next) => {
   // Obtenemos los datos del cuerpo de la peticion
   const { curso_id, usuario_id, categoria_id, imagen, curso_nombre, descripcion, conoci_previo, privacidad_id, curso_fecha_creacion } = req.body
   //Creamos el codigo para generar
+
   var code = generator.generateCodes(pattern, 1, {});
   //Creamo un json para el nuevo curso
   let newCourse = {
@@ -77,18 +86,20 @@ router.post('/courses', async (req, res, next) => {
     privacidad_id,
     curso_fecha_creacion
   }
+  if (process.env.NODE_ENV === 'test') {
+    cursosMock.push({curso_id,curso_nombre})
+  } else {
+    // Aqui va el query para guardar un curso
+    await pool.query('INSERT INTO heroku_b3e0382f6ba83ba.cursos SET ? ', newCourse)
+    //const savedCourse = await pool.query('SELECT * FROM heroku_b3e0382f6ba83ba.cursos WHERE curso_nombre = ?', [curso_nombre])
 
-  // Aqui va el query para guardar un curso
-  await pool.query('INSERT INTO heroku_b3e0382f6ba83ba.cursos SET ? ', newCourse)
-  //const savedCourse = await pool.query('SELECT * FROM heroku_b3e0382f6ba83ba.cursos WHERE curso_nombre = ?', [curso_nombre])
-
-  // Respuesta a la peticion
-  res.status(201).json({
-    msg: 'Curso creado'
-  })// Aca se debe de enviar el nuevo curso creado
-  //Manejo de errror
-  //EMpezamos con el catch
-
+    // Respuesta a la peticion
+    res.status(201).json({
+      msg: 'Curso creado'
+    })// Aca se debe de enviar el nuevo curso creado
+    //Manejo de errror
+    //EMpezamos con el catch
+  }
 })
 
 /**

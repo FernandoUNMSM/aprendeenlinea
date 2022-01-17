@@ -46,11 +46,16 @@ router.post('/login', async (req, res) => {
     })
   }
 
-  //En caso de que los datos sean correctos se devolverán todos los datos del usuario
   res.status(200).json({
     //Se envia los datos del usuario validado al Frontend
     user: user[0]
   })
+
+  //En caso de que los datos sean correctos se devolverán todos los datos del usuario
+  // res.status(200).json({
+  //   //Se envia los datos del usuario validado al Frontend
+  //   user: user[0]
+  // })
 })
 
 
